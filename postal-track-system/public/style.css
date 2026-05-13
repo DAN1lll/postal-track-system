@@ -1,0 +1,266 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Карточки */
+.card {
+    background: rgba(255, 255, 255, 0.97);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
+    padding: 28px;
+    margin-bottom: 20px;
+    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.header-card {
+    text-align: center;
+    padding: 32px;
+}
+
+/* Логотип */
+.logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    padding: 10px 28px;
+    border-radius: 40px;
+    margin-bottom: 24px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.logo:hover {
+    transform: scale(1.02);
+}
+
+.logo-icon {
+    font-size: 24px;
+    color: white;
+}
+
+.logo-text {
+    font-size: 20px;
+    font-weight: 700;
+    color: white;
+    letter-spacing: 1px;
+}
+
+h1 {
+    font-size: 28px;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 8px;
+}
+
+.subtitle {
+    color: #64748b;
+    font-size: 14px;
+}
+
+/* Вкладки */
+.tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.tab-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 40px;
+    color: white;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+}
+
+.tab-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.tab-btn.active {
+    background: white;
+    color: #667eea;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Формы */
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: #475569;
+    font-size: 13px;
+}
+
+.form-group input, .form-group select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.form-group input:focus, .form-group select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Кнопки */
+.btn {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border: none;
+    padding: 12px 24px;
+    border-radius: 40px;
+    color: white;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+    width: 100%;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+/* Сетки */
+.grid-2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+}
+
+/* Результаты */
+.result-container {
+    background: #f8fafc;
+    border-radius: 16px;
+    padding: 16px;
+    min-height: 200px;
+}
+
+.loader {
+    text-align: center;
+    padding: 40px;
+    color: #64748b;
+}
+
+.error {
+    color: #dc2626;
+    background: #fef2f2;
+    padding: 12px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.success {
+    color: #16a34a;
+    background: #dcfce7;
+    padding: 12px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+/* Таблицы */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+th {
+    background: #f8fafc;
+    font-weight: 600;
+    color: #475569;
+}
+
+/* Статусы */
+.status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.status-delivered { background: #22c55e; color: white; }
+.status-transit { background: #f59e0b; color: white; }
+.status-sorting { background: #8b5cf6; color: white; }
+.status-registered { background: #64748b; color: white; }
+
+/* Футер */
+.footer {
+    margin-top: 32px;
+    text-align: center;
+    padding: 24px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 12px;
+}
+
+.footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin: 12px 0;
+    flex-wrap: wrap;
+}
+
+.footer-links a {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+}
+
+.footer-links a:hover {
+    color: white;
+}
+
+/* Адаптив */
+@media (max-width: 768px) {
+    body { padding: 12px; }
+    .card { padding: 20px; }
+    h1 { font-size: 24px; }
+    .tab-btn { padding: 6px 14px; font-size: 12px; }
+    .grid-2 { grid-template-columns: 1fr; }
+    th, td { padding: 8px; font-size: 12px; }
+}

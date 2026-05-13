@@ -1,0 +1,17 @@
+{
+  "name": "demo-proj",
+  "main": "worker.js",
+  "compatibility_date": "2026-01-01",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "staff-db",
+      "database_id": "2a08b610-cd8d-4ffc-882b-e186024c6dd0"
+    }
+  ],
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application"
+  }
+}
