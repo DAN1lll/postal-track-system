@@ -1,5 +1,3 @@
-// script.js – клиентская логика Postal Track
-// Защита от двойных кликов + автоматические повторные попытки при сетевых сбоях
 
 const STATUS_MAP = {
     'registered': { name: 'Зарегистрировано', class: 'status-registered' },
@@ -16,7 +14,6 @@ const STATUS_MAP = {
 class RequestLock {
     constructor() { this.active = new Map(); }
     
-    // Для любых асинхронных операций (без кнопки)
     async execute(key, fn, ...args) {
         if (this.active.get(key)) return null;
         this.active.set(key, true);
@@ -24,7 +21,6 @@ class RequestLock {
         finally { this.active.delete(key); }
     }
     
-    // Для кнопок с визуальной обратной связью
     async executeWithButton(btnId, fn, ...args) {
         const btn = document.getElementById(btnId);
         if (this.active.get(btnId)) {
@@ -67,7 +63,6 @@ function showLoad(id) { let el = document.getElementById(id); if (el) el.innerHT
 function showErr(id, msg) { let el = document.getElementById(id); if (el) el.innerHTML = `<div class="error">❌ ${escapeHtml(msg)}</div>`; }
 function showOk(id, msg) { let el = document.getElementById(id); if (el) el.innerHTML = `<div class="success">✅ ${escapeHtml(msg)}</div>`; }
 
-// ============ УСТОЙЧИВЫЙ fetch с таймаутом и повторными попытками ============
 async function fetchWithTimeout(url, options = {}, timeout = 30000) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeout);
@@ -106,7 +101,6 @@ async function apiReq(url, opts) {
     }
 }
 
-// ============ API ФУНКЦИИ ============
 async function trackShipment(t) { return apiReq(`/api/postal/track/${t}`); }
 async function getStuck() { let r = await apiReq('/api/postal/stuck'); return Array.isArray(r) ? r : (r.data || []); }
 async function getWorkload() { let r = await apiReq('/api/postal/office-workload'); return r.success ? r.data : []; }
@@ -116,7 +110,6 @@ async function createShipment(d) { return apiReq('/api/admin/shipment', { method
 async function updateStatusAPI(d) { return apiReq('/api/admin/status', { method: 'POST', body: JSON.stringify(d) }); }
 async function closeOfficeAPI(code) { return apiReq('/api/admin/close-office', { method: 'POST', body: JSON.stringify({ index_code: code }) }); }
 
-// ============ UI ФУНКЦИИ (с защитой от повторных вызовов через RequestLock) ============
 async function loadTracking() {
     const tracking = document.getElementById('trackingInput')?.value.trim().toUpperCase();
     if (!tracking) { showErr('trackResult', 'Введите трек-номер'); return; }
@@ -230,7 +223,6 @@ async function closeOfficeAction() {
     } catch(e) { showErr('closeResult', e.message); }
 }
 
-// ============ ИНИЦИАЛИЗАЦИЯ ============
 function initTabs() {
     const btns = document.querySelectorAll('.tab-btn');
     const contents = document.querySelectorAll('.tab-content');
