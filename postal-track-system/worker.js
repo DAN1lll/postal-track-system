@@ -1,6 +1,5 @@
 // worker.js – Почтовое отслеживание (API, статика через Assets)
 
-// ============ КОНФИГУРАЦИЯ ============
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
@@ -19,9 +18,6 @@ function validateTracking(t) {
   return t && /^[A-Z0-9]{6,20}$/i.test(t);
 }
 
-// ============ API МЕТОДЫ (D1) ============
-
-// 1. Получение информации об отправлении (текущий статус + история)
 async function getTracking(env, tracking) {
   if (!validateTracking(tracking)) return sendError('Неверный трек-номер');
   const shipment = await env.DB.prepare('SELECT * FROM shipments WHERE tracking_number = ?')
@@ -52,7 +48,6 @@ async function getTracking(env, tracking) {
   });
 }
 
-// 2. Отправления, застрявшие на сортировке более 2 дней
 async function getStuck(env) {
   const stuck = await env.DB.prepare(`
     WITH latest AS (
@@ -71,7 +66,6 @@ async function getStuck(env) {
   return sendJson(stuck.results || []);
 }
 
-// 3. Загруженность отделений
 async function getWorkload(env) {
   const workload = await env.DB.prepare(`
     SELECT 
@@ -90,28 +84,22 @@ async function getWorkload(env) {
   return sendJson({ success: true, data: workload.results || [] });
 }
 
-// 4. Регистрация нового отправления (генерация трек-номера)
-// 4. Регистрация нового отправления (с автоинкрементным трек-номером TRK001, TRK002...)
 async function registerShipment(env, data) {
   const { recipient_name, recipient_address, sender_name, weight_kg, type, location_index } = data;
   if (!recipient_name || !recipient_address) return sendError('Укажите получателя и адрес');
   
-  // Получаем следующий номер из tracking_counter
   let nextNumber = 1;
   try {
-    // Пытаемся увеличить счётчик
     const updateResult = await env.DB.prepare(`
       UPDATE tracking_counter SET last_number = last_number + 1 WHERE id = 1
     `).run();
     
     if (updateResult.changes === 0) {
-      // Если записи нет, создаём и возвращаем 1
       await env.DB.prepare(`
         INSERT INTO tracking_counter (id, last_number) VALUES (1, 1)
       `).run();
       nextNumber = 1;
     } else {
-      // Получаем новое значение
       const counter = await env.DB.prepare(`
         SELECT last_number FROM tracking_counter WHERE id = 1
       `).first();
@@ -124,26 +112,21 @@ async function registerShipment(env, data) {
   
   const trackingNumber = `TRK${String(nextNumber).padStart(3, '0')}`;
   
-  // Проверяем, не существует ли уже такого номера (на случай ручного вмешательства)
   const existing = await env.DB.prepare('SELECT tracking_number FROM shipments WHERE tracking_number = ?')
     .bind(trackingNumber).first();
   if (existing) {
-    // Рекурсивно вызываем себя для следующего номера (маловероятно, но на всякий случай)
     return registerShipment(env, data);
   }
   
-  // Проверка отделения
   const office = await env.DB.prepare('SELECT index_code FROM post_offices WHERE index_code = ? AND is_active = 1')
     .bind(location_index).first();
   const defaultOffice = (office && location_index) ? location_index : '101000';
   
-  // Вставка отправления
   await env.DB.prepare(`
     INSERT INTO shipments (tracking_number, recipient_name, recipient_address, sender_name, weight_kg, type)
     VALUES (?, ?, ?, ?, ?, ?)
   `).bind(trackingNumber, recipient_name, recipient_address, sender_name || null, weight_kg || 0, type || 'parcel').run();
   
-  // Начальный статус
   await env.DB.prepare(`
     INSERT INTO statuses (tracking_number, status, location_index, status_date, notes)
     VALUES (?, 'registered', ?, datetime('now'), 'Зарегистрировано')
@@ -152,7 +135,6 @@ async function registerShipment(env, data) {
   return sendJson({ success: true, tracking_number: trackingNumber, message: 'Отправление зарегистрировано' });
 }
 
-// 5. Обновление статуса с проверками (неубывание дат, обязательный out_for_delivery)
 async function updateStatus(env, data) {
   const { tracking_number, status, location_index, notes } = data;
   if (!tracking_number || !status) return sendError('Укажите трек-номер и статус');
@@ -174,7 +156,6 @@ async function updateStatus(env, data) {
     if (!office) return sendError('Отделение не найдено или закрыто');
   }
   
-  // Нельзя выдать без статуса "доставляется"
   if (status === 'delivered') {
     const hasOut = await env.DB.prepare(`
       SELECT 1 FROM statuses 
@@ -196,7 +177,6 @@ async function updateStatus(env, data) {
   }
 }
 
-// 6. Закрытие отделения (запрет, если есть невыданные отправления)
 async function closeOffice(env, index_code) {
   if (!index_code) return sendError('Укажите индекс');
   
@@ -226,7 +206,6 @@ async function closeOffice(env, index_code) {
   return sendJson({ success: true, message: `Отделение ${index_code} закрыто` });
 }
 
-// 7. Отделение с наибольшим потоком за последние 30 дней
 async function getBusiestOffice(env) {
   const busiest = await env.DB.prepare(`
     SELECT po.index_code, po.address, COUNT(*) as shipment_count
@@ -239,7 +218,6 @@ async function getBusiestOffice(env) {
   return sendJson({ success: true, data: busiest || null });
 }
 
-// 8. Поиск отправлений по получателю (имя или адрес)
 async function getRecipientShipments(env, query) {
   const { name, address } = query;
   if (!name && !address) return sendError('Укажите имя или адрес');
@@ -264,7 +242,6 @@ async function getRecipientShipments(env, query) {
   return sendJson({ success: true, data: shipments.results || [] });
 }
 
-// ============ ОСНОВНОЙ ОБРАБОТЧИК ============
 async function handleRequest(request, env) {
   const url = new URL(request.url);
   const path = url.pathname;
@@ -275,7 +252,6 @@ async function handleRequest(request, env) {
     return new Response(null, { status: 204, headers: CORS_HEADERS });
   }
 
-  // ----- API МАРШРУТЫ (все начинаются с /api) -----
   if (method === 'GET') {
     const trackMatch = path.match(/^\/api\/postal\/track\/([A-Z0-9]+)$/i);
     if (trackMatch) return getTracking(env, trackMatch[1]);
@@ -291,10 +267,6 @@ async function handleRequest(request, env) {
     if (path === '/api/admin/close-office') return closeOffice(env, (await request.json()).index_code);
   }
 
-  // ----- ВСЁ ОСТАЛЬНОЕ – статика (отдаём через Assets) -----
-  // Assets сам найдёт файлы в папке ./public благодаря настройке в wrangler.jsonc
-  // not_found_handling = "single-page-application" гарантирует, что для любых не-API путей
-  // (включая /) будет отдан index.html
   return env.ASSETS.fetch(request);
 }
 
