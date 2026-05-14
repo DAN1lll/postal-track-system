@@ -1,4 +1,3 @@
-// worker.js – Почтовое отслеживание (API, статика через Assets)
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
